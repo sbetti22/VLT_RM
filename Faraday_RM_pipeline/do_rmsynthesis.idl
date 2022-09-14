@@ -1,0 +1,44 @@
+;fn='J3134_Smith05313.fits'
+;spawn, 'ls /students/sbetti/12B-336/IDLscripts/SMITH_02362.fits', fnlist
+;spawn, 'ls /students/sbetti/12B-336/CASA_Images2016/SMITH_02479.fits', fnlist
+
+
+spawn, 'ls /students/sbetti/12B-336_2016/IDL_Scripts/Fits_Images/SMITH_03272.fits', fnlist
+i=0
+;!p.multi = [0, 3, 4]
+!p.multi = 0
+FOR i=0, n_elements(fnlist) - 1 DO BEGIN & $
+  image = readfits(fnlist[i], hdr) & $
+  print, fnlist[i] & $
+  help, image & $
+  phi = findgen(400)*10-2000  &$
+  freq = findgen(readfitsheader(hdr, 'NAXIS3'))*readfitsheader(hdr,'CDELT3') + readfitsheader(hdr, 'CRVAL3') & $
+  lambda = 3e8/freq & $
+  nf = n_elements(freq) - 1 & $
+& $;  nf = 16 & $idl
+& $;  Q=image[*,*,0:61,0] & $
+& $;  U=image[*,*,0:61,1] & $
+  Q=image[*,*,0:nf,1] & $
+  U=image[*,*,0:nf,2] & $  
+  ;r = (0.5) * atan(U / Q)
+;	plot, lambda^2, r[*,64,67], psym=1
+& $; perhaps use weight=1/rms^2, and probably only do RM synthesis on central quadrant
+  rmsynthesis, transpose(q), transpose(u), lambda[0:nf]^2, phi, fdf_cube & $
+& $ rmclean, fdf_cube[*, 63, 77], phi, lambda[0:nf]^2, 0.0005, fdf_cleaned, fdf_residuals, clean_components & $
+  ;cube_to_clean=total(total(fdf_cube[*,62:64,76:78],2),2) & $
+  ;rmclean, cube_to_clean, phi, lambda[0:nf]^2, 0.0005, fdf_cleaned, fdf_residuals, clean_components & $
+  rmarr = float(sqrt(fdf_cleaned*conj(fdf_cleaned))) & $
+  ;w = plot(phi, rmarr, title='Smith00995', xtitle='phi')& $
+  ;w->save, 'Smith00995.png', width=600 & $
+  plot, phi, rmarr, title=fnlist[i], xtitle='phi' & $
+
+
+
+END
+
+
+
+ENDFOR
+
+PI = abs(transpose(fdf_cube))
+writefits, 'PI.fits', PI
