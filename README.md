@@ -9,5 +9,7 @@ Modified by S. Betti (Sept 2015)
 
 Faraday Rotation Measure pipeline:
 rmsynthesis, rmclean written by: T. Robishaw (6.8.2010 - 6.4.2013)
+
 readfitsheader written by: A. Hill (2005-2009)
+
 SBfind_RM modified from do_rmsynthesis (written by A. Hill)
